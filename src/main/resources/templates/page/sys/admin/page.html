@@ -1,0 +1,206 @@
+<div class="layuimini-container layuimini-page-anim">
+    <div class="layuimini-main">
+        <fieldset class="table-search-fieldset">
+            <legend>搜索信息</legend>
+            <div style="margin: 10px 10px 10px 10px">
+                <form class="layui-form layui-form-pane" action="">
+                    <div class="layui-form-item">
+                        <div class="layui-input-inline">
+                            <input type="text" id="name" class="layui-input" autocomplete="off" placeholder="请输入账号">
+                        </div>
+                        <div class="layui-input-inline">
+                            <input type="text" id="loginname" class="layui-input" autocomplete="off"
+                                   placeholder="请输用户昵称">
+                        </div>
+                        <div class="layui-input-inline layui-form">
+                            <select id="status">
+                                <option value="">请选择账号状态</option>
+                                <option value="0">正常</option>
+                                <option value="-1">禁用</option>
+                            </select>
+                        </div>
+                        <div class="layui-inline">
+                            <button type="submit" class="layui-btn layui-btn-primary"  lay-submit lay-filter="data-search-btn"><i class="layui-icon"></i> 搜 索</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </fieldset>
+
+        <script type="text/html" id="toolbar">
+            <div class="layui-btn-container">
+                <button class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-event="add"> 添加 </button>
+                <button class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete"> 删除 </button>
+            </div>
+        </script>
+
+        <table class="layui-hide" id="data-table" lay-filter="data-table"></table>
+
+        <script type="text/html" id="tool">
+            <a class="layui-btn layui-btn-normal layui-btn-xs data-count-edit" lay-event="edit">编辑</a>
+            <a class="layui-btn layui-btn-xs layui-btn-danger data-count-delete" lay-event="delete">删除</a>
+        </script>
+
+    </div>
+</div>
+
+<script>
+    layui.use(['form', 'table','miniPage','element', 'transfer','Api'], function () {
+        var $ = layui.jquery,
+            Api = layui.Api,
+            form = layui.form,
+            table = layui.table,
+            miniPage = layui.miniPage;
+        form.render();
+        table.render({
+            elem: '#data-table'
+            ,url: Api.adminApi
+            ,parseData: function(res){ //res 即为原始返回的数据
+                return {
+                    "code": res.code, //解析接口状态
+                    "msg": res.msg, //解析提示文本
+                    "count": res.data.totalElements, //解析数据长度
+                    "data": res.data.content //解析数据列表
+                };
+            }
+            ,request: {
+                pageName: 'pageNum' //页码的参数名称，默认：page
+                ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
+            }
+            , cols: [
+                [
+                    {type: 'checkbox', fixed: 'left'},
+                    {field: 'name', title: '名称', width: 130},
+                    {field: 'loginName', title: '登录账号', width: 130},
+                    {field: 'updateTime', title: '最后登录时间'},
+                    {
+                        field: 'status', title: '状态', width: 100, templet: function (item) {
+                            return '<input type="checkbox" lay-filter="statusChange" lay-skin="switch" lay-text="正常|禁用" checked ='+item.status+'>';
+                        }
+                    },
+                    {width: 300, toolbar: "#tool", title: '操作'}
+                ]
+            ]
+            ,id: 'dataTable'
+            ,page: true
+            , limits: [10, 20, 30, 40, 50]
+            , toolbar: '#toolbar'
+            ,done: function(res, curr, count){
+                console.log(res);
+                if(res.code==-1){
+                    location.href='/';
+                }
+            }
+
+        });
+
+        // 监听搜索操作
+        form.on('submit(data-search-btn)', function (data) {
+            table.reload('dataTable', {
+                page: {curr: 1},
+                where: data.field
+            });
+            return false;
+        });
+
+        //头工具栏事件
+        table.on('toolbar(dataTable)', function (obj) {
+            var checkStatus = table.checkStatus(obj.config.id);
+            switch(obj.event){
+                case 'add':
+                    edit(0);
+                    break;
+                case 'del':
+                    var data = checkStatus.data;
+                    if (data.length == 0) {
+                        layer.msg("请选择要批量删除的用户");
+                    } else {
+                        var userIds = [];
+                        $(data).each(function (index, item) {
+                            userIds.push(item.id);
+                        });
+                        tipDialog(userIds, "选中的");
+                    }
+                    break;
+            }
+        });
+
+        var tipDialog = function (userIds, username) {
+            layer.open({
+                content: '确定要删除[' + username + "]用户么?",
+                yes: async function (index, layero) {
+                    layer.close(index);
+                }
+            });
+        };
+
+
+        let edit = function(id){
+            var openWH = miniPage.getOpenWidthHeight();
+            var index = layer.open({
+                title: '编辑账号',
+                type: 2,
+                shade: 0.2,
+                maxmin:true,
+                shadeClose: true,
+                area: [openWH[0] + 'px', openWH[1] + 'px'],
+                offset: [openWH[2] + 'px', openWH[3] + 'px'],
+                content: '/home/sys/admin/edit?id='+obj,
+            });
+            $(window).on("resize", function () {
+                layer.full(index);
+            });
+        };
+
+        //监听表格复选框选择
+        table.on('checkbox(statusChange)', function (obj) {
+            console.log(obj)
+        });
+
+        /**
+         * table 列工具栏
+         */
+        table.on('tool(dataTable)', function (obj) {
+            var data = obj.data;
+            switch (obj.event) {
+                case 'del':
+                    var userIds = [];
+                    userIds.push(data.id);
+                    tipDialog(userIds, data.name);
+                    break;
+                case 'edit':
+                    edit(data.id);
+                    break;
+                case 'setRole':
+            }
+
+
+            if (obj.event === 'edit') {
+
+                var content = miniPage.getHrefContent('page/table/add.html');
+                var openWH = miniPage.getOpenWidthHeight();
+
+                var index = layer.open({
+                    title: '编辑用户',
+                    type: 1,
+                    shade: 0.2,
+                    maxmin:true,
+                    shadeClose: true,
+                    area: [openWH[0] + 'px', openWH[1] + 'px'],
+                    offset: [openWH[2] + 'px', openWH[3] + 'px'],
+                    content: content,
+                });
+                $(window).on("resize", function () {
+                    layer.full(index);
+                });
+                return false;
+            } else if (obj.event === 'delete') {
+                layer.confirm('真的删除行么', function (index) {
+                    obj.del();
+                    layer.close(index);
+                });
+            }
+        });
+
+    });
+</script>

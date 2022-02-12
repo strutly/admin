@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:include="layout/header">
+
+</head>
+<link rel="stylesheet" href="/css/admin.css">
+<link rel="stylesheet" href="/css/login.css">
+<body>
+<div class="layadmin-user-login layadmin-user-display-show" id="LAY-user-login">
+    <div class="layadmin-user-login-main">
+        <div class="layadmin-user-login-box layadmin-user-login-header">
+            <h2>后台登录</h2>
+        </div>
+        <div class="layadmin-user-login-box layadmin-user-login-body layui-form">
+            <div class="layui-form-item">
+                <label class="layadmin-user-login-icon layui-icon layui-icon-username"
+                       for="LAY-user-login-username"></label>
+                <input type="text" name="username" id="LAY-user-login-username" lay-verify="required"
+                       placeholder="用户名" class="layui-input" autocomplete="off">
+            </div>
+            <div class="layui-form-item">
+                <label class="layadmin-user-login-icon layui-icon layui-icon-password"
+                       for="LAY-user-login-password"></label>
+                <input type="password" name="password" id="LAY-user-login-password" lay-verify="required"
+                       placeholder="密码" class="layui-input" autocomplete="off">
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-row">
+                    <div class="layui-col-xs7">
+                        <label class="layadmin-user-login-icon layui-icon layui-icon-vercode"
+                               for="LAY-user-login-vercode"></label>
+                        <input type="text" name="vercode" id="LAY-user-login-vercode" lay-verify="required"
+                               placeholder="图形验证码" class="layui-input" autocomplete="off">
+                    </div>
+                    <div class="layui-col-xs5">
+                        <div style="margin-left: 10px;">
+                            <img id="vercodeImg" title="点击刷新验证码" alt="验证码"
+                                 onclick="this.src='/kaptcha?d='+new Date()*1"
+                                 src="/kaptcha?d=1"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <button class="layui-btn layui-btn-fluid" lay-submit lay-filter="LAY-user-login-submit">登入</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.use(['element'], function () {
+        var element = layui.element,$ = layui.$
+            , form = layui.form;
+        if(window.location.href.indexOf("kickout")>-1){
+            top.layer.msg("您已在别处登录，请您修改密码或重新登录！", {
+                offset: 't',
+                anim: 6,
+            });
+        };
+        form.render();
+        //提交
+        form.on('submit(LAY-user-login-submit)', function (obj) {
+            $.ajax({
+                url: '/login',
+                type: "post",
+                data: JSON.stringify(obj.field),
+                dataType: "json",
+                contentType: "application/json", //必须有
+                success: function (res) {
+                    console.log(res);
+                    if (res.code == 0) {
+                        top.window.location.href = "/home/index";
+                    } else {
+                        $("#vercodeImg").click();
+                        layer.msg(res.msg);
+                    }
+                }
+            })
+        });
+
+        $('body').bind('keydown', function(event) {
+            if (event.which  == "13") {
+                $(".layui-btn").click();
+            }
+        });
+    });
+</script>
+</body>
+</html>

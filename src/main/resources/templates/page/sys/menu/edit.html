@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:include="layout/header">
+</head>
+<body>
+<div class="layuimini-main">
+    <div class="layui-row layui-col-space10">
+        <div class="layui-col-md9">
+            <div class="layui-form layuimini-form">
+
+                <form class="layui-form" lay-filter="formData" autocomplete="off">
+                    <input name="id" hidden value=""/>
+                    <input id="pid" name="pid" hidden value="" lay-verify="required" lay-reqText="请选择所属菜单"/>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">类型</label>
+                        <div class="layui-input-block">
+                            <input type="radio" name="type" value="0" title="目录" lay-filter="radio-type">
+                            <input type="radio" name="type" value="1" title="菜单" lay-filter="radio-type">
+                            <input type="radio" name="type" value="2" title="按钮" lay-filter="radio-type">
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">菜单名称</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="title" placeholder="请输入菜单名称" autocomplete="off" class="layui-input"
+                                   value="">
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">授权标识</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="perms" placeholder="请输入授权标识" autocomplete="off" class="layui-input"
+                                   value="">
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">排序码</label>
+                        <div class="layui-input-block">
+                            <input type="number" name="orderNum" placeholder="请输入排序码(越大越高)" autocomplete="off" class="layui-input"
+                                   value="">
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">菜单图标</label>
+                        <div class="layui-input-block">
+                            <input type="text" id="iconPicker" name="icon" value="" lay-filter="iconPicker"
+                                   class="hide">
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <div class="layui-form-label ">所属菜单</div>
+                        <div class="layui-input-block">
+                            <input type="text" id="pName"  value="" placeholder="请选择所属菜单" autocomplete="off"
+                                   class="layui-input" readonly="readonly" style="background:#eeeeee!important">
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label ">接口URL</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="url" value="" placeholder="请输入接口URL" class="layui-input">
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item menu-perms" hidden>
+                        <div class="layui-form-label">授权标识</div>
+                        <div class="layui-input-block">
+                            <input type="text" name="perms" value="" placeholder="请输入授权标识,如果 sys:user:list"
+                                   autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">状态</label>
+                        <div class="layui-input-block">
+                            <input type="checkbox" name="status" lay-skin="switch" lay-filter="switch" lay-text="启用|禁用"
+                                   value="">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <div class="layui-input-block">
+                            <button type="submit" class="layui-btn" lay-submit="" lay-filter="submit">保存</button>
+                            <button type="button" class="layui-btn layui-btn-primary" id="cancel">返回</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="layui-col-md3">
+            <div id="menuTree"></div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+<script>
+    layui.use(['form','Api', 'iconPicker','tree'],async function () {
+        var form = layui.form,
+            iconPicker = layui.iconPicker,
+            url = layui.url(),
+            Api = layui.Api,
+            tree = layui.tree,
+            layer = layui.layer,
+            $ = layui.$;
+        /**
+         * 初始化表单，要加上，不然刷新部分组件可能会不加载
+         */
+        form.render();
+
+        let res = await Api.getMenu({id:url.search.id});
+        //赋值
+        form.val('formData', res.data);
+        //加载树
+        tree.render({
+            elem: '#menuTree'
+            , data: res.data.children
+            , onlyIconControl: true  //是否仅允许节点左侧图标控制展开收缩
+            , click: function (obj) {
+                console.log(obj);
+                $("#pid").val(obj.data.id);
+                $("#pName").val(obj.data.title);
+                //layer.msg(JSON.stringify(selectNode.data.title));
+            }
+        });
+
+        //图标
+        iconPicker.render({
+            // 选择器，推荐使用input
+            elem: '#iconPicker',
+            // 数据类型：fontClass/unicode，推荐使用fontClass
+            type: 'fontClass',
+            // 是否开启搜索：true/false，默认true
+            search: true,
+            // 是否开启分页：true/false，默认true
+            page: true,
+            // 每页显示数量，默认12
+            limit: 16,
+            click: function (data) {
+                console.log(data);
+                $("#iconPicker").val(data.icon);
+            }
+        });
+        //状态切换
+        form.on('switch(switch)', function (e) {
+            console.log(e);
+            $("input[name=status]").attr('type', 'hidden').val(this.checked ? 1 : 0);
+        });
+        // 当前弹出层，防止ID被覆盖
+        var parentIndex = layer.index;
+        //监听提交
+        form.on('submit(submit)', function (data) {
+
+            Api.updateActivity(JSON.stringify(data.field)).then(res => {
+                back();
+            });
+
+
+            var index = layer.alert(JSON.stringify(data.field), {
+                title: '最终的提交信息'
+            }, function () {
+                // 关闭弹出层
+                back();
+
+            });
+
+
+            return false;
+        });
+        //返回,关闭弹出层
+        let back = function () {
+            var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+            parent.layer.close(index);
+            parent.layui.table.reload('data-table');
+        }
+
+    });
+</script>
