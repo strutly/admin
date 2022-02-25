@@ -46,13 +46,13 @@ public class RoleService {
 		Role role = roleRepository.findById(id).orElse(new Role());
 		Set<Menu> menus = role.getMenus();
 		Set<Long> checkList = menus.stream().map(menu -> menu.getId()).collect(Collectors.toSet());
-		List<Menu> allMenus = menuService.getMenu(aid);
+		List<MenuNodeRespVO> allMenus = BeanMapper.mapList(menuService.getMenu(aid),MenuNodeRespVO.class);
 		allMenus.forEach(menu -> {
 			if(checkList.contains(menu.getId())){
 				menu.setChecked(true);
 			}
 		});
-		role.setChilidren(BeanMapper.mapList(allMenus, MenuNodeRespVO.class));
+		role.setChilidren(allMenus);
 		return role;
 	}
 

@@ -4,12 +4,15 @@ layui.define(['layer', 'table'], function (exports) {
     var table = layui.table;
 
     var treetable = {
+        config:{},
         // 渲染树形表格
         render: function (param) {
             // 检查参数
             if (!treetable.checkParam(param)) {
                 return;
             }
+            //保存参数
+            this.config = {...param};
             // 获取数据
             if (param.data) {
                 treetable.init(param, param.data);
@@ -18,7 +21,10 @@ layui.define(['layer', 'table'], function (exports) {
                     console.log(res.data);
                     treetable.init(param, res.data);
                 });
-            }
+            };
+        },
+        reload:function(){
+            this.render(this.config);
         },
         // 渲染表格
         init: function (param, data) {

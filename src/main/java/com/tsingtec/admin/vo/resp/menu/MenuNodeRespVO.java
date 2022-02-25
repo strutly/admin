@@ -15,11 +15,11 @@ import java.util.List;
 @Data
 public class MenuNodeRespVO {
 
-    @ApiModelProperty(value = "状态")
+    @ApiModelProperty(value = "id")
     @JsonSerialize(using= ToStringSerializer.class)
     private Long id;
 
-    @ApiModelProperty(value = "状态")
+    @ApiModelProperty(value = "名称")
     private String title;//名称
 
     private String icon = "layui-icon-home";
@@ -35,14 +35,12 @@ public class MenuNodeRespVO {
 
     private Integer orderNum = 0;//排序
 
-    private Boolean status;
-
     private Integer type;//类型
 
     private List<MenuNodeRespVO> children;
 
-    private Boolean Spread=false;
+    private Boolean spread = false;
 
-    private Boolean checked=false;
+    private Boolean checked = false;
 
 }

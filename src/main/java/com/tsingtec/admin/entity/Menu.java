@@ -45,18 +45,11 @@ public class Menu extends BaseEntity {
 
     private Integer type = Constants.CATALOGUE;//类型
 
-    private Boolean status = Constants.VALID;
-
     @ManyToMany(mappedBy = "menus",fetch = FetchType.LAZY)
     @JsonIgnore
     private Set<Role> roles = new HashSet<>(0);
 
     @Transient
-    private List<Menu> children= Lists.newArrayList();
+    private List<Menu> children = Lists.newArrayList();
 
-    @Transient
-    private Boolean spread = Constants.UNVALID;
-
-    @Transient
-    private Boolean checked = Constants.UNVALID;
 }

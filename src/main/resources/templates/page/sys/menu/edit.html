@@ -57,7 +57,7 @@
                     <div class="layui-form-item">
                         <div class="layui-form-label ">所属菜单</div>
                         <div class="layui-input-block">
-                            <input type="text" id="pName"  value="" placeholder="请选择所属菜单" autocomplete="off"
+                            <input type="text" id="pName" name="pidName" value="" placeholder="请选择所属菜单" autocomplete="off"
                                    class="layui-input" readonly="readonly" style="background:#eeeeee!important">
                         </div>
                     </div>
@@ -76,18 +76,9 @@
                                    autocomplete="off" class="layui-input">
                         </div>
                     </div>
-
-                    <div class="layui-form-item">
-                        <label class="layui-form-label">状态</label>
-                        <div class="layui-input-block">
-                            <input type="checkbox" name="status" lay-skin="switch" lay-filter="switch" lay-text="启用|禁用"
-                                   value="">
-                        </div>
-                    </div>
                     <div class="layui-form-item">
                         <div class="layui-input-block">
                             <button type="submit" class="layui-btn" lay-submit="" lay-filter="submit">保存</button>
-                            <button type="button" class="layui-btn layui-btn-primary" id="cancel">返回</button>
                         </div>
                     </div>
                 </form>
@@ -116,17 +107,15 @@
 
         let res = await Api.getMenu({id:url.search.id});
         //赋值
-        form.val('formData', res.data);
+        form.val('formData', res.data.menuNodeRespVO);
         //加载树
         tree.render({
             elem: '#menuTree'
             , data: res.data.children
             , onlyIconControl: true  //是否仅允许节点左侧图标控制展开收缩
             , click: function (obj) {
-                console.log(obj);
                 $("#pid").val(obj.data.id);
                 $("#pName").val(obj.data.title);
-                //layer.msg(JSON.stringify(selectNode.data.title));
             }
         });
 
@@ -143,41 +132,29 @@
             // 每页显示数量，默认12
             limit: 16,
             click: function (data) {
-                console.log(data);
                 $("#iconPicker").val(data.icon);
             }
-        });
-        //状态切换
-        form.on('switch(switch)', function (e) {
-            console.log(e);
-            $("input[name=status]").attr('type', 'hidden').val(this.checked ? 1 : 0);
         });
         // 当前弹出层，防止ID被覆盖
         var parentIndex = layer.index;
         //监听提交
         form.on('submit(submit)', function (data) {
-
-            Api.updateActivity(JSON.stringify(data.field)).then(res => {
-                back();
-            });
-
-
-            var index = layer.alert(JSON.stringify(data.field), {
-                title: '最终的提交信息'
-            }, function () {
-                // 关闭弹出层
-                back();
-
-            });
-
-
+            if(data.field.id){
+                Api.updateMenu(JSON.stringify(data.field)).then(res => {
+                    back();
+                });
+            }else{
+                Api.addMenu(JSON.stringify(data.field)).then(res=>{
+                    back();
+                })
+            }
             return false;
         });
         //返回,关闭弹出层
         let back = function () {
             var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
             parent.layer.close(index);
-            parent.layui.table.reload('data-table');
+            parent.layui.treetable.reload();
         }
 
     });

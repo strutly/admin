@@ -139,7 +139,13 @@ public class MenuService {
 	}
 
 	public List<Menu> findAll(){
-		return menuRepository.findAll();
+		List<Menu> menus = menuRepository.findAll();
+		menus.forEach(menu -> {
+			Menu parent = menuRepository.findById(menu.getPid()).orElse(null);
+			menu.setPidName(parent==null?"顶级菜单":parent.getTitle());
+
+		});
+		return menus.stream().sorted(Comparator.comparing(Menu::getPid).thenComparing(Menu::getOrderNum).reversed()).collect(Collectors.toList());
 	}
 
 	public List<Menu> getMenu(Long aid) {
@@ -218,7 +224,6 @@ public class MenuService {
 		Menu menu = new Menu();
 		menu.setId(Constants.PARENT);
 		menu.setTitle("默认顶级菜单");
-		menu.setSpread(true);
 		menu.setChildren(getChildAll(Constants.PARENT,menus));
 		return Lists.newArrayList(menu);
 	}

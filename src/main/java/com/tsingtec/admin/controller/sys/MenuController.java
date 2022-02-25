@@ -5,6 +5,7 @@ import com.tsingtec.admin.entity.Menu;
 import com.tsingtec.admin.service.MenuService;
 import com.tsingtec.admin.vo.req.menu.MenuEditReqVO;
 import com.tsingtec.admin.vo.resp.menu.HomeMenuRespVO;
+import com.tsingtec.admin.vo.resp.menu.MenuDetailRespVO;
 import com.tsingtec.admin.vo.resp.menu.MenuInfo;
 import com.tsingtec.admin.vo.resp.menu.MenuNodeRespVO;
 import com.tsingtec.commons.mapper.BeanMapper;
@@ -31,6 +32,7 @@ public class MenuController extends GenericController {
     @GetMapping("/menu/home")
     public R<HomeMenuRespVO> getHomeInfo(){
         List<Menu> menus = menuService.menuTreeList(this.getAid());
+        //menus.removeIf(menu->!menu.getStatus());
         List<MenuInfo> homeMenus = BeanMapper.mapList(menus, MenuInfo.class);
         HomeMenuRespVO respVO = new HomeMenuRespVO();
         respVO.setMenuInfo(homeMenus);
@@ -44,30 +46,37 @@ public class MenuController extends GenericController {
 
     @PostMapping("/menu")
     public R addMenu(@RequestBody @Valid MenuEditReqVO vo){
-        Menu menu = BeanMapper.map(vo,Menu.class);
+        Menu menu = new Menu();
+        BeanMapper.mapExcludeNull(vo,menu);
         menuService.save(menu);
         return R.ok();
     }
 
     @DeleteMapping("/menu")
-    public R deleted(Long id){
+    public R deleted(@RequestBody Long id){
         menuService.deleteById(id);
         return R.ok();
     }
 
     @PutMapping("/menu")
     public R updateMenu(@RequestBody @Valid MenuEditReqVO vo){
-        Menu menu = BeanMapper.map(vo,Menu.class);
+        Menu menu =menuService.findById(vo.getId());
+        BeanMapper.mapExcludeNull(vo,menu);
         menuService.update(menu);
         return R.ok();
     }
 
+    @PutMapping("/menu/status")
+    public R updateMenuStatus(){
+
+        return R.ok();
+    }
+
+
     @GetMapping("/menu/{id}")
-    public R<MenuNodeRespVO> detail(@PathVariable("id") Long id){
+    public R<MenuDetailRespVO> detail(@PathVariable("id") Long id){
         Menu menu = menuService.findById(id);
-        menu = menu==null ? new Menu():menu;
-        MenuNodeRespVO respVO = BeanMapper.map(menu,MenuNodeRespVO.class);
-        respVO.setChildren(BeanMapper.mapList(menuService.selectAllMenuByTree(this.getAid(),id),MenuNodeRespVO.class));
-        return R.ok(respVO);
+        MenuNodeRespVO respVO = menu==null?new MenuNodeRespVO():BeanMapper.map(menu,MenuNodeRespVO.class);
+        return R.ok(new MenuDetailRespVO(respVO,BeanMapper.mapList(menuService.selectAllMenuByTree(this.getAid(),id),MenuNodeRespVO.class)));
     }
 }

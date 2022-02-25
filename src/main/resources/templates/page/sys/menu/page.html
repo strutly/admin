@@ -11,23 +11,21 @@
 
         <script type="text/html" id="tool">
             <a class="layui-btn layui-btn-normal layui-btn-xs data-count-edit" lay-event="edit">编辑</a>
-            <a class="layui-btn layui-btn-xs layui-btn-danger data-count-delete" lay-event="delete">删除</a>
+            <a class="layui-btn layui-btn-xs layui-btn-danger data-count-delete" lay-event="del">删除</a>
         </script>
 
     </div>
 </div>
 <script>
-    layui.use(['table', 'tree', 'treetable', 'iconPicker', 'Api','miniPage'], function () {
-        var iconPicker = layui.iconPicker,
-            tree = layui.tree,
+    layui.use(['table', 'treetable', 'Api','miniPage','form'], function () {
+        var tree = layui.tree,
             table = layui.table,
             miniPage = layui.miniPage,
             Api = layui.Api,
             layer = layui.layer,
-            $ = jQuery = layui.jquery,
             form = layui.form,
-            treetable = layui.treetable,
-            selectNode = null;
+            $ = jQuery = layui.jquery,
+            treetable = layui.treetable;
 
         treetable.render({
             // 渲染表格
@@ -48,36 +46,15 @@
                     {field: 'url', title: 'url'},
                     {
                         field: 'type', title: '类型', templet: function (item) {
-                            let name = "目录"
-                            let cla = '';
-                            switch (item.type) {
-                                case 1:
-                                    name = "菜单";
-                                    cla = 'layui-btn-normal';
-                                    break;
-                                case 2:
-                                    name = "按钮";
-                                    cla = 'layui-btn-warm';
-                                    break;
-                                default:
-                                    break;
-                            }
-                            return '<a class="layui-btn layui-btn-xs ' + cla + '" >' + name + '</a>';
+                            let names = ["目录","菜单","按钮"];
+                            let clas = ["","layui-btn-normal","layui-btn-warm"];
+                            return '<a class="layui-btn layui-btn-xs ' + clas[item.type] + '" >' + names[item.type] + '</a>';
                         }
                     },
                     {field: 'pidName', title: '父级名称'},
                     {field: 'perms', title: '授权标识'},
                     {field: 'createTime', title: '创建时间'},
                     {field: 'orderNum', title: '排序码'},
-                    {
-                        field: 'status', title: '状态', templet: function (item) {
-                            if (item.status) {
-                                return '  <input type="checkbox" lay-skin="switch" lay-text="启用|禁用" checked disabled>';
-                            } else {
-                                return '  <input type="checkbox" lay-skin="switch" lay-text="启用|禁用" disabled>';
-                            }
-                        }
-                    },
                     {title: '操作', width: 180, toolbar: '#tool'}
                 ]
             ]
@@ -94,11 +71,8 @@
 
         //编辑
         var edit = function (id) {
-
-            var content = miniPage.getHrefContent('/home/sys/menu/edit?id='+id);
             var openWH = miniPage.getOpenWidthHeight();
-
-            var index = layer.open({
+            layer.open({
                 title: '编辑权限',
                 type: 2,
                 shade: 0.2,
@@ -108,72 +82,41 @@
                 offset: [openWH[2] + 'px', openWH[3] + 'px'],
                 content: '/home/sys/menu/edit?id='+id,
             });
-            $(window).on("resize", function () {
-                layer.full(index);
-            });
-
         };
 
         table.on('tool(data-table)', function (obj) {
             var data = obj.data;
             switch (obj.event) {
                 case 'del':
-                    deletedMenu(data.id, data.name);
+                    deletedMenu(data.id, data.title);
                     break;
                 case 'edit':
                     edit(data.id);
                     break;
             }
         });
+
         var deletedMenu = function (menuId, menuName) {
             layer.open({
-                content: '确定要删除' + menuName + "?",
+                content: '确定要删除[' + menuName + "]?",
                 yes: async function (index, layero) {
                     layer.close(index); //如果设定了yes回调，需进行手工关闭
-                    let res = await Api.deleteMenu(JSON.stringify(menuId));
+                    let res = await Api.deleteMenu(menuId);
                     top.layer.msg(res.msg, {
                         offset: 't',
                         anim: 6,
                         time: 1500
                     }, function () {
-                        location.reload();
+                        treetable.reload();
                     });
                 }
             });
         };
-        var initTree = async function (id) {
-            let res = await Api.getMenuTree({menuId: id})
-            loadDeptTree(res.data);
-        };
-        var loadDeptTree = function (data) {
-            tree.render({
-                elem: '#menuTree'
-                , data: data
-                , onlyIconControl: true  //是否仅允许节点左侧图标控制展开收缩
-                , click: function (obj) {
-                    selectNode = obj;
-                    layer.msg(JSON.stringify(selectNode.data.title));
-                }
-            });
-        };
-        form.on('switch(switch)', function () {
-            $(".operation_menu input[name=status]").attr('type', 'hidden').val(this.checked ? 1 : 0);
+        form.on('switch(switch)', function (e) {
+
+            console.log(e);
+            //$(".operation_menu input[name=status]").attr('type', 'hidden').val(this.checked ? 1 : 0);
         });
 
-        var initRadio = function (value) {
-            var radio = document.getElementsByName("type");
-            var radioLength = radio.length;
-            for (var i = 0; i < radioLength; i++) {
-                if (value == radio[i].value) {
-                    $(radio[i]).next().click();
-                }
-            }
-        };
-
-        $(document).on("click", "#cancel", function () {
-            $(".menu-table").show();
-            $(".operation_menu").hide();
-            return false;
-        });
     });
 </script>

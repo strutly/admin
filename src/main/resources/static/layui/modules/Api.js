@@ -55,25 +55,25 @@ layui.define(['jquery'],function(exports){
                             reject(res);
                             break;
                         default:
-                            top.layer.msg(res.msg, {
-                                offset: 't',
-                                anim: 6,
-                            }, function () {
-                                window.location.href = "/index/500"
-                            });
+                            // top.layer.msg(res.msg, {
+                            //     offset: 't',
+                            //     anim: 6,
+                            // }, function () {
+                            //     window.location.href = "/index/500"
+                            // });
                             reject(res);
                             break;
                     }
                 },
                 error: function (XMLHttpRequest, textStatus, errorThrown) {
                     top.layer.close(roleSaveLoading);
-                    if (XMLHttpRequest.status == 404) {
-                        location.href = "/index/404";
-                    } else {
-                        layer.msg("服务器好像除了点问题！请稍后试试", function () {
-                            window.location.href = "/index/500"
-                        });
-                    }
+                    // if (XMLHttpRequest.status == 404) {
+                    //     location.href = "/index/404";
+                    // } else {
+                    //     layer.msg("服务器好像除了点问题！请稍后试试", function () {
+                    //         window.location.href = "/index/500"
+                    //     });
+                    // }
                     reject(XMLHttpRequest);
                 },
                 complete:function () {
@@ -97,7 +97,7 @@ layui.define(['jquery'],function(exports){
         getMenu:data=>request(pathParams(ApiConfig.menuDetailApi,data),data,"get"),
         updateMenu:data=>request(ApiConfig.menuApi,data,"put"),
         addMenu:data=>request(ApiConfig.menuApi,data,"post"),
-
+        deleteMenu:data=>request(ApiConfig.menuApi,data,"DELETE"),
 
     };
     exports('Api', Object.assign(api, ApiConfig));
