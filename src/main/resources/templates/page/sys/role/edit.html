@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:include="layout/header">
+</head>
+<div class="layuimini-main">
+    <div class="layui-row layui-col-space10">
+        <form class="layui-form layuimini-form">
+
+        </form>
+        <div class="layui-col-md3">
+            <div class="layui-card">
+                <div class="layui-card-header">请选择权限</div>
+                <div class="layui-card-body">
+                    <div id="menuTree"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script id="formBody" type="text/html">
+    <div class="layui-col-md9">
+        {{if id}}
+            <input name="id" hidden value="{{id}}"/>
+        {{/if}}
+        <div class="layui-form-item">
+            <label class="layui-form-label">角色名称</label>
+            <div class="layui-input-block">
+                <input type="text" name="name" value="{{name}}" placeholder="请输入角色名称" autocomplete="off"
+                       class="layui-input" lay-verify="required">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-form-label ">备注</div>
+            <div class="layui-input-block">
+                <input type="text" name="description" value="{{description}}" placeholder="请输入备注信息" autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">状态</label>
+            <div class="layui-input-block">
+                <input type="checkbox" name="status" lay-skin="switch" value="{{status}}" lay-filter="switch"
+                       lay-text="启用|禁用" {{if status}}checked{{/if}}>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button type="submit" class="layui-btn" lay-submit="" lay-filter="submit">保存</button>
+            </div>
+        </div>
+    </div>
+
+</script>
+<script>
+    layui.use(['form', 'Api'], async function () {
+        var form = layui.form,
+            Api = layui.Api,
+            url = layui.url(),
+            tree = layui.tree,
+            $ = layui.$;
+
+        /**
+         * 初始化表单，要加上，不然刷新部分组件可能会不加载
+         */
+
+        var selectNode;
+        let res = await Api.getRole({id: url.search.id});
+        let html = template("formBody",res.data.role);
+        $("form").html(html);
+        form.render();
+        var loadPermissionTree = function (data) {
+            tree.render({
+                elem: '#menuTree'
+                , data: data
+                , onlyIconControl: true  //是否仅允许节点左侧图标控制展开收缩
+                , showCheckbox: true  //是否显示复选框
+                , id: 'menuIds'
+                , accordion: false
+                ,oncheck: function(obj){
+                    console.log(obj.data); //得到当前点击的节点数据
+                    console.log(obj.checked); //得到当前节点的展开状态：open、close、normal
+                    console.log(obj.elem); //得到当前节点元素
+                }
+            });
+        };
+        loadPermissionTree(res.data.menus);
+
+        form.on('switch(switch)', function(data){
+            $(".layui-form-item input[name=status]").attr('type', 'hidden').val(this.checked ? 'true' : 'false');
+        });
+        form.on('submit(submit)', function (obj) {
+            console.log(obj)
+            let data = obj.field;
+            let menuIds = [];
+            var brchArrays = tree.getChecked('menuIds');
+            console.log(brchArrays);
+
+            data.mids = getMenuIds(brchArrays, menuIds);
+            if(data.id){
+                Api.updateRole(JSON.stringify(data)).then(res => {
+                    back();
+                });
+            }else{
+                Api.addRole(JSON.stringify(data)).then(res=>{
+                    back();
+                })
+            }
+            return false;
+        });
+
+        var getMenuIds = function(jsonObj, menuIds) {
+            if (jsonObj == undefined || jsonObj == null || !jsonObj instanceof Object) {
+                return null;
+            }
+            for (var i = 0; i < jsonObj.length; i++) {
+                menuIds.push(jsonObj[i].id);
+                getMenuIds(jsonObj[i].children, menuIds);
+            }
+            return menuIds;
+        };
+        //返回,关闭弹出层
+        let back = function () {
+            var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+            parent.layer.close(index);
+            parent.layui.table.reload("dataTable");
+        }
+
+    });
+</script>

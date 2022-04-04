@@ -48,7 +48,7 @@
                             <hr>
                         </dd>
                         <dd>
-                            <a href="javascript:;"layuimini-content-href="/logout" class="login-out">退出登录</a>
+                            <a href="/logout" class="login-out">退出登录</a>
                         </dd>
                     </dl>
                 </li>
@@ -107,12 +107,6 @@
             pageAnim: true,             // 切换菜单动画
         };
         miniAdmin.render(options);
-
-        $('.login-out').on("click", function () {
-            layer.msg('退出登录成功', function () {
-                window.location = 'page/login-3.html';
-            });
-        });
     });
 </script>
 </body>

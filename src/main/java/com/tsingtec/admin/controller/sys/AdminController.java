@@ -46,6 +46,12 @@ public class AdminController extends GenericController{
         return R.ok(adminService.page(admin,pageable).map(a->BeanMapper.map(a,AdminRespVO.class)));
     }
 
+    @GetMapping("/admin/{id}")
+    @RequiresPermissions("sys:admin:detail")
+    public R detail(@PathVariable("id")Long id) {
+        return R.ok(adminService.findById(id));
+    }
+
     /**
      * 新增账号
      * @param vo

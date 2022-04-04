@@ -10,7 +10,7 @@ import lombok.Data;
  * @Version 1.0
  */
 @Data
-public class AdminPageReqVO{
+public class AdminPageReqVO extends PageReqVO {
 
     @ApiModelProperty(value = "名称")
     private String name;

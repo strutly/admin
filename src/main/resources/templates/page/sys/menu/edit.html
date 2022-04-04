@@ -3,7 +3,6 @@
       xmlns:th="http://www.thymeleaf.org">
 <head th:include="layout/header">
 </head>
-<body>
 <div class="layuimini-main">
     <div class="layui-row layui-col-space10">
         <div class="layui-col-md9">
@@ -135,8 +134,6 @@
                 $("#iconPicker").val(data.icon);
             }
         });
-        // 当前弹出层，防止ID被覆盖
-        var parentIndex = layer.index;
         //监听提交
         form.on('submit(submit)', function (data) {
             if(data.field.id){

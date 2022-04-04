@@ -35,7 +35,6 @@ public class Admin extends BaseEntity {
     private String name;
 
     /**登录帐号*/
-    @Column(unique = true)
     private String loginName;
 
     /**密码*/
@@ -51,7 +50,7 @@ public class Admin extends BaseEntity {
     @JsonSerialize(using= ToStringSerializer.class)
     private Long createdId;
 
-    /**0:有效，-1:禁止登录*/
+    /**true:有效，false:禁止登录*/
     private Boolean status = Constants.VALID;
 
     @ManyToMany(fetch = FetchType.LAZY)

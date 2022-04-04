@@ -3,7 +3,6 @@
         <script type="text/html" id="toolbar">
             <div class="layui-btn-container">
                 <button class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-event="add"> 添加</button>
-                <button class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete"> 删除</button>
             </div>
         </script>
 
@@ -18,13 +17,10 @@
 </div>
 <script>
     layui.use(['table', 'treetable', 'Api','miniPage','form'], function () {
-        var tree = layui.tree,
-            table = layui.table,
+        var table = layui.table,
             miniPage = layui.miniPage,
             Api = layui.Api,
             layer = layui.layer,
-            form = layui.form,
-            $ = jQuery = layui.jquery,
             treetable = layui.treetable;
 
         treetable.render({
@@ -57,11 +53,16 @@
                     {field: 'orderNum', title: '排序码'},
                     {title: '操作', width: 180, toolbar: '#tool'}
                 ]
-            ]
+            ],
+            done: function(res, curr, count){
+                console.log(res);
+                if(res.code=='-1'){
+                    top.location.href='/';
+                }
+            }
         });
 
         table.on('toolbar(data-table)', function (obj) {
-            var data = obj.data;
             switch (obj.event) {
                 case 'add':
                     edit(0);
@@ -69,11 +70,20 @@
             }
         });
 
+        var tipDialog = function (userIds, username) {
+            layer.open({
+                content: '确定要删除[' + username + "]角色么?",
+                yes: async function (index, layero) {
+                    layer.close(index);
+                }
+            });
+        };
+
         //编辑
         var edit = function (id) {
             var openWH = miniPage.getOpenWidthHeight();
             layer.open({
-                title: '编辑权限',
+                title: '编辑角色',
                 type: 2,
                 shade: 0.2,
                 maxmin:true,
@@ -112,11 +122,5 @@
                 }
             });
         };
-        form.on('switch(switch)', function (e) {
-
-            console.log(e);
-            //$(".operation_menu input[name=status]").attr('type', 'hidden').val(this.checked ? 1 : 0);
-        });
-
     });
 </script>

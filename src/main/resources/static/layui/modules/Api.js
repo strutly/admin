@@ -15,6 +15,9 @@ layui.define(['jquery'],function(exports){
         menuApi:"/manager/menu",
         menuDetailApi:"/manager/menu/{id}",
         menuHomeApi:"/manager/menu/home",
+        //role
+        roleApi:"/manager/role",
+        roleDetailApi:"/manager/role/{id}",
     };
 
     var request =  function(url,params,type){
@@ -31,26 +34,26 @@ layui.define(['jquery'],function(exports){
                 success: function (res) {
                     top.layer.close(roleSaveLoading);
                     switch (res.code) {
-                        case 0:
+                        case "0":
                             resolve(res);
                             break;
-                        case 1:
+                        case "1":
                             top.layer.msg(res.msg, {
                                 offset: 't',
                                 anim: 6,
                             }, function () {
-                                top.location = ""
+                                //top.location = ""
                             });
                             reject(res);
                             break;
-                        case 400:
+                        case "400":
                             top.layer.msg(res.msg, {
                                 offset: 't',
                                 anim: 6,
                             });
                             reject(res);
                             break;
-                        case 403:
+                        case "403":
                             window.location.href = "/index/403"
                             reject(res);
                             break;
@@ -98,6 +101,11 @@ layui.define(['jquery'],function(exports){
         updateMenu:data=>request(ApiConfig.menuApi,data,"put"),
         addMenu:data=>request(ApiConfig.menuApi,data,"post"),
         deleteMenu:data=>request(ApiConfig.menuApi,data,"DELETE"),
+        //role
+        getRole:data=>request(pathParams(ApiConfig.roleDetailApi,data),data,"get"),
+        updateRole:data=>request(ApiConfig.roleApi,data,"put"),
+        addRole:data=>request(ApiConfig.roleApi,data,"post"),
+        deleteRole:data=>request(ApiConfig.roleApi,data,"DELETE"),
 
     };
     exports('Api', Object.assign(api, ApiConfig));

@@ -6,21 +6,16 @@
                 <form class="layui-form layui-form-pane" action="">
                     <div class="layui-form-item">
                         <div class="layui-input-inline">
-                            <input type="text" id="name" class="layui-input" autocomplete="off" placeholder="请输入账号">
+                            <input type="text" name="name" class="layui-input" autocomplete="off" placeholder="请输入账号">
                         </div>
                         <div class="layui-input-inline">
-                            <input type="text" id="loginname" class="layui-input" autocomplete="off"
+                            <input type="text"  name="loginName" class="layui-input" autocomplete="off"
                                    placeholder="请输用户昵称">
                         </div>
-                        <div class="layui-input-inline layui-form">
-                            <select id="status">
-                                <option value="">请选择账号状态</option>
-                                <option value="0">正常</option>
-                                <option value="-1">禁用</option>
-                            </select>
-                        </div>
                         <div class="layui-inline">
-                            <button type="submit" class="layui-btn layui-btn-primary"  lay-submit lay-filter="data-search-btn"><i class="layui-icon"></i> 搜 索</button>
+                            <button type="submit" class="layui-btn layui-btn-primary" lay-submit
+                                    lay-filter="data-search-btn"><i class="layui-icon"></i> 搜 索
+                            </button>
                         </div>
                     </div>
                 </form>
@@ -29,33 +24,92 @@
 
         <script type="text/html" id="toolbar">
             <div class="layui-btn-container">
-                <button class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-event="add"> 添加 </button>
-                <button class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete"> 删除 </button>
+                <button class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-event="add"> 添加</button>
+                <button class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="del"> 删除</button>
             </div>
         </script>
 
         <table class="layui-hide" id="data-table" lay-filter="data-table"></table>
 
+        <div id="roles" class="demo-transfer" style="display: none"></div>
+
         <script type="text/html" id="tool">
+            <a class="layui-btn layui-btn-xs data-count-edit" lay-event="setRole">赋予角色</a>
             <a class="layui-btn layui-btn-normal layui-btn-xs data-count-edit" lay-event="edit">编辑</a>
-            <a class="layui-btn layui-btn-xs layui-btn-danger data-count-delete" lay-event="delete">删除</a>
+            <a class="layui-btn layui-btn-xs layui-btn-danger data-count-delete" lay-event="del">删除</a>
         </script>
 
     </div>
 </div>
 
+
+<script id="admin-form" type="text/html">
+
+    <div class="layuimini-main">
+        <div class="layui-form layuimini-form">
+            {{if id}}
+                <input type="hidden" name="id" value="{{id}}">
+            {{/if}}
+            <div class="layui-form-item">
+                <label class="layui-form-label">账号名称</label>
+                <div class="layui-input-block">
+                    <input type="text" name="name" value="{{name}}" lay-verify="required" placeholder="账号名称" autocomplete="off"
+                           class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">登录名称</label>
+                <div class="layui-input-block">
+                    <input type="text" name="loginName" value="{{loginName}}" placeholder="登录名称" lay-verify="required" autocomplete="new-password"
+                           class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-form-label ">密码</div>
+                <div class="layui-input-block">
+                    <input type="password" name="password" value="{{password}}" lay-verify="required" placeholder="请输入密码" autocomplete="new-password"
+                           class="layui-input">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <div class="layui-form-label ">确认密码</div>
+                <div class="layui-input-block">
+                    <input type="password" lay-verify="required|confirmPass" placeholder="请输入密码"  class="layui-input">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">状态</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" name="status" value="{{status}}" lay-skin="switch" lay-filter="switch"
+                           lay-text="启用|禁用" {{if status}}checked{{/if}}>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button type="submit" class="layui-btn layui-btn-normal" lay-submit="" lay-filter="submit">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
 <script>
-    layui.use(['form', 'table','miniPage','element', 'transfer','Api'], function () {
+    layui.use(['form', 'table', 'miniPage', 'element', 'transfer', 'Api','layer'], function () {
         var $ = layui.jquery,
             Api = layui.Api,
             form = layui.form,
             table = layui.table,
+            layer = layui.layer,
+            transfer = layui.transfer,
             miniPage = layui.miniPage;
         form.render();
         table.render({
             elem: '#data-table'
-            ,url: Api.adminApi
-            ,parseData: function(res){ //res 即为原始返回的数据
+            , url: Api.adminApi
+            , parseData: function (res) { //res 即为原始返回的数据
                 return {
                     "code": res.code, //解析接口状态
                     "msg": res.msg, //解析提示文本
@@ -63,9 +117,9 @@
                     "data": res.data.content //解析数据列表
                 };
             }
-            ,request: {
+            , request: {
                 pageName: 'pageNum' //页码的参数名称，默认：page
-                ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                , limitName: 'pageSize' //每页数据量的参数名，默认：limit
             }
             , cols: [
                 [
@@ -75,40 +129,44 @@
                     {field: 'updateTime', title: '最后登录时间'},
                     {
                         field: 'status', title: '状态', width: 100, templet: function (item) {
-                            return '<input type="checkbox" lay-filter="statusChange" lay-skin="switch" lay-text="正常|禁用" checked ='+item.status+'>';
+                            if (item.status) {
+                                return '  <input type="checkbox" lay-skin="switch" lay-text="正常|禁用" checked disabled>';
+                            }else{
+                                return '  <input type="checkbox" lay-skin="switch" lay-text="正常|禁用" disabled>';
+                            }
                         }
                     },
                     {width: 300, toolbar: "#tool", title: '操作'}
                 ]
             ]
-            ,id: 'dataTable'
-            ,page: true
+            , page: true
+            , id: 'dataTable'
             , limits: [10, 20, 30, 40, 50]
             , toolbar: '#toolbar'
-            ,done: function(res, curr, count){
+            , done: function (res, curr, count) {
                 console.log(res);
-                if(res.code==-1){
-                    location.href='/';
+                if (res.code == '-1') {
+                    location.href = '/';
                 }
             }
-
         });
 
         // 监听搜索操作
-        form.on('submit(data-search-btn)', function (data) {
+        form.on('submit(data-search-btn)', function (obj) {
+            console.log(obj)
             table.reload('dataTable', {
                 page: {curr: 1},
-                where: data.field
+                where: obj.field
             });
             return false;
         });
 
         //头工具栏事件
-        table.on('toolbar(dataTable)', function (obj) {
+        table.on('toolbar(data-table)', function (obj) {
             var checkStatus = table.checkStatus(obj.config.id);
-            switch(obj.event){
+            switch (obj.event) {
                 case 'add':
-                    edit(0);
+                    edit({});
                     break;
                 case 'del':
                     var data = checkStatus.data;
@@ -129,38 +187,36 @@
             layer.open({
                 content: '确定要删除[' + username + "]用户么?",
                 yes: async function (index, layero) {
+                    let res = await Api.deleteAdmin(JSON.stringify(userIds));
+                    console.log(res);
                     layer.close(index);
+                    table.reload('dataTable');
                 }
             });
         };
 
-
-        let edit = function(id){
+        // 当前弹出层，防止ID被覆盖
+        var parentIndex = layer.index;
+        let edit = function (data) {
             var openWH = miniPage.getOpenWidthHeight();
-            var index = layer.open({
+            var content = template("admin-form",data)
+            parentIndex = layer.open({
                 title: '编辑账号',
-                type: 2,
+                type: 1,
                 shade: 0.2,
-                maxmin:true,
+                maxmin: true,
                 shadeClose: true,
                 area: [openWH[0] + 'px', openWH[1] + 'px'],
                 offset: [openWH[2] + 'px', openWH[3] + 'px'],
-                content: '/home/sys/admin/edit?id='+obj,
+                content: content,
             });
-            $(window).on("resize", function () {
-                layer.full(index);
-            });
+            form.render();
         };
-
-        //监听表格复选框选择
-        table.on('checkbox(statusChange)', function (obj) {
-            console.log(obj)
-        });
 
         /**
          * table 列工具栏
          */
-        table.on('tool(dataTable)', function (obj) {
+        table.on('tool(data-table)', async function (obj) {
             var data = obj.data;
             switch (obj.event) {
                 case 'del':
@@ -169,37 +225,80 @@
                     tipDialog(userIds, data.name);
                     break;
                 case 'edit':
-                    edit(data.id);
+                    edit(data);
                     break;
                 case 'setRole':
+                    let res = await Api.getAdminRole({id: data.id});
+                    initTransfer(res.data);
+                    layer.open({
+                        type: 1,
+                        skin: 'layui-layer-molv',
+                        title: "赋予角色",
+                        area: ['500px', '400px'],
+                        offset: 'auto',
+                        shade: 0,
+                        shadeClose: false,
+                        content: $("#roles"),
+                        btn: ['确定', '取消'],
+                        yes: function (index) {
+                            //获得右侧数据
+                            var roleIds = [];
+                            var getData = transfer.getData('ownData');
+                            $(getData).each(function (index, item) {
+                                roleIds.push(item.value);
+                            });
+                            Api.setAdminRole(JSON.stringify({
+                                id: data.id,
+                                rids:roleIds
+                            }));
+                            layer.close(index);
+                        }
+                    });
+                    break;
             }
+        });
 
+        form.on('switch(switch)', function(data){
+            $(".layui-form-item input[name=status]").attr('type', 'hidden').val(this.checked ? 'true' : 'false');
+        });
 
-            if (obj.event === 'edit') {
+        var initTransfer = function (data) {
+            transfer.render({
+                elem: '#roles'
+                , data: data.allRole
+                , title: ['赋予角色', '拥有角色']
+                , showSearch: true
+                , value: data.ownRole
+                , id: 'ownData'
+                , parseData: function (res) {
+                    return {
+                        "value": res.id //数据值
+                        , "title": res.name //数据标题
+                    }
+                }
+            })
+        };
 
-                var content = miniPage.getHrefContent('page/table/add.html');
-                var openWH = miniPage.getOpenWidthHeight();
-
-                var index = layer.open({
-                    title: '编辑用户',
-                    type: 1,
-                    shade: 0.2,
-                    maxmin:true,
-                    shadeClose: true,
-                    area: [openWH[0] + 'px', openWH[1] + 'px'],
-                    offset: [openWH[2] + 'px', openWH[3] + 'px'],
-                    content: content,
-                });
-                $(window).on("resize", function () {
-                    layer.full(index);
-                });
-                return false;
-            } else if (obj.event === 'delete') {
-                layer.confirm('真的删除行么', function (index) {
-                    obj.del();
-                    layer.close(index);
-                });
+        form.verify({
+            confirmPass:function(value){
+                if($('input[name=password]').val() !== value)
+                    return '两次密码输入不一致！';
             }
+        });
+
+        // 监听搜索操作
+        form.on('submit(submit)',async function (obj) {
+            let data = obj.field;
+            let res = {};
+            if(data.id){
+                res = await Api.updateAdmin(JSON.stringify(data));
+            }else{
+                res = await Api.addAdmin(JSON.stringify(data));
+            }
+            layer.close(parentIndex);
+            table.reload('dataTable');
+
+            return false;
         });
 
     });

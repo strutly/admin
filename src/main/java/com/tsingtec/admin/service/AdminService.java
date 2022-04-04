@@ -95,7 +95,9 @@ public class AdminService {
         if(admin!=null){
             throw new ServiceException("该登录账号已存在,请修改后再保存", ApiCodeEnum.BAD_REQUEST);
         }
-        admin = BeanMapper.map(vo,Admin.class);
+        admin = new Admin();
+        BeanMapper.mapExcludeNull(vo,admin);
+
         String salt = generateSalt();
         String password = encryptPassword(vo.getPassword(),salt);
         admin.setSalt(salt);
@@ -164,7 +166,11 @@ public class AdminService {
     private List<Long>  getRidsByAid(Long aid){
         Admin admin = findById(aid);
         Set<Role> roles = admin.getRoles();
-        List<Long> rids = roles.stream().map(role -> role.getId()).collect(Collectors.toList());
+        List<Long> rids = roles.stream().map(role -> {
+            System.out.println(role.getId());
+            return role.getId();
+        }).collect(Collectors.toList());
+        System.out.println(rids.toString());
         return rids;
     }
 

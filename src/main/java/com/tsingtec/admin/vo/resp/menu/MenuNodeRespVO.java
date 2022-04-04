@@ -35,7 +35,7 @@ public class MenuNodeRespVO {
 
     private Integer orderNum = 0;//排序
 
-    private Integer type;//类型
+    private Integer type=0;//类型
 
     private List<MenuNodeRespVO> children;
 

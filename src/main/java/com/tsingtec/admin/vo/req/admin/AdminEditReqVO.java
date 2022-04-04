@@ -31,5 +31,5 @@ public class AdminEditReqVO {
 
     @ApiModelProperty(value = "状态")
     @NotNull(message = "状态不能为空")
-    private Boolean status;
+    private Boolean status = false;
 }

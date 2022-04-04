@@ -24,7 +24,7 @@ import java.util.Set;
 @Table(name = "sys_menu")
 @ToString(exclude = {"roles"})
 @EqualsAndHashCode(exclude = {"roles"})
-@Where(clause="del_status="+ Constants.NO_DELETE_FLAG)
+@Where(clause = "del_status=" + Constants.NO_DELETE_FLAG)
 public class Menu extends BaseEntity {
 
     private String title;//名称
@@ -35,7 +35,7 @@ public class Menu extends BaseEntity {
 
     private String url;//链接
 
-    @JsonSerialize(using= ToStringSerializer.class)
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long pid = Constants.PARENT;//
 
     @Transient
@@ -45,11 +45,17 @@ public class Menu extends BaseEntity {
 
     private Integer type = Constants.CATALOGUE;//类型
 
-    @ManyToMany(mappedBy = "menus",fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "menus", fetch = FetchType.LAZY)
     @JsonIgnore
     private Set<Role> roles = new HashSet<>(0);
 
     @Transient
     private List<Menu> children = Lists.newArrayList();
+
+    @Transient
+    private Boolean checked = false;
+
+    @Transient
+    private Boolean spread = false;
 
 }

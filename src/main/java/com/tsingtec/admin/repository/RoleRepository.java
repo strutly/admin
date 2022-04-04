@@ -24,6 +24,8 @@ public interface RoleRepository extends JpaRepository<Role, Long>, JpaSpecificat
 
     List<Role> findByCreatedId(Long aid);
 
+    List<Role> findByIfSuper(Boolean ifSuper);
+
     /**
      * 取消角色与菜单之间的关系
      * @param ids 角色ID

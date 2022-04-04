@@ -57,7 +57,7 @@
 /*左侧菜单更多下拉样式 leftMenuNavMore */
 .layuimini-menu-left .layui-nav .layui-nav-more, .layuimini-menu-left-zoom.layui-nav .layui-nav-more {
     border-top-color: rgb(191, 187, 187);
-    top:50%;
+    top:40%;
 }
 
 /*左侧菜单更多下拉样式 leftMenuNavMore */

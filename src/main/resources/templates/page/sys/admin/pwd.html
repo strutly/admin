@@ -12,7 +12,7 @@
             <div class="layui-form-item">
                 <label class="layui-form-label required">旧的密码</label>
                 <div class="layui-input-block">
-                    <input type="password" name="old_password" lay-verify="required" lay-reqtext="旧的密码不能为空" placeholder="请输入旧的密码" value="" class="layui-input">
+                    <input type="password" name="oldPwd" lay-verify="required" lay-reqtext="旧的密码不能为空" placeholder="请输入旧的密码" value="" class="layui-input">
                     <tip>填写自己账号的旧的密码。</tip>
                 </div>
             </div>
@@ -20,13 +20,13 @@
             <div class="layui-form-item">
                 <label class="layui-form-label required">新的密码</label>
                 <div class="layui-input-block">
-                    <input type="password" name="new_password" lay-verify="required" lay-reqtext="新的密码不能为空" placeholder="请输入新的密码" value="" class="layui-input">
+                    <input type="password" name="newPwd" lay-verify="required" lay-reqtext="新的密码不能为空" placeholder="请输入新的密码" value="" class="layui-input">
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label required">新的密码</label>
+                <label class="layui-form-label required">确认密码</label>
                 <div class="layui-input-block">
-                    <input type="password" name="again_password" lay-verify="required" lay-reqtext="新的密码不能为空" placeholder="请输入新的密码" value="" class="layui-input">
+                    <input type="password" lay-verify="required|confirmPass" placeholder="请输入密码"  class="layui-input">
                 </div>
             </div>
 
@@ -40,25 +40,26 @@
 </div>
 
 <script>
-    layui.use(['form', 'miniPage'], function () {
+    layui.use(['form', 'miniPage','Api'], function () {
         var form = layui.form,
-            layer = layui.layer,
+            Api = layui.Api,
+            $ = layui.jquery,
             miniPage = layui.miniPage;
         /**
          * 初始化表单，要加上，不然刷新部分组件可能会不加载
          */
         form.render();
-
+        form.verify({
+            confirmPass:function(value){
+                if($('input[name=newPwd]').val() !== value)
+                    return '两次密码输入不一致！';
+            }
+        });
         //监听提交
-        form.on('submit(saveBtn)', function (data) {
-            var index = layer.alert(JSON.stringify(data.field), {
-                title: '最终的提交信息'
-            }, function () {
-                layer.close(index);
-                miniPage.hashHome();
-            });
+        form.on('submit(saveBtn)',async function (data) {
+            await Api.updatePwd(JSON.stringify(data.field));
+            miniPage.hashHome();
             return false;
         });
-
     });
 </script>

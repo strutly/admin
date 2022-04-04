@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.tsingtec.admin.constants.Constants;
-import com.tsingtec.admin.vo.resp.menu.MenuNodeRespVO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -14,7 +13,6 @@ import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -50,8 +48,4 @@ public class Role extends BaseEntity {
     @JsonIgnore
     @ManyToMany(mappedBy = "roles", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<Admin> admins = new HashSet<>(0);
-
-    @Transient
-    private List<MenuNodeRespVO> chilidren;
-
 }

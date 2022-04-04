@@ -31,8 +31,7 @@ public class MenuController extends GenericController {
      */
     @GetMapping("/menu/home")
     public R<HomeMenuRespVO> getHomeInfo(){
-        List<Menu> menus = menuService.menuTreeList(this.getAid());
-        //menus.removeIf(menu->!menu.getStatus());
+        List<Menu> menus = menuService.menuTreeList(this.getAid(),true);
         List<MenuInfo> homeMenus = BeanMapper.mapList(menus, MenuInfo.class);
         HomeMenuRespVO respVO = new HomeMenuRespVO();
         respVO.setMenuInfo(homeMenus);
@@ -65,13 +64,6 @@ public class MenuController extends GenericController {
         menuService.update(menu);
         return R.ok();
     }
-
-    @PutMapping("/menu/status")
-    public R updateMenuStatus(){
-
-        return R.ok();
-    }
-
 
     @GetMapping("/menu/{id}")
     public R<MenuDetailRespVO> detail(@PathVariable("id") Long id){

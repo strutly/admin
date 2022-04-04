@@ -25,7 +25,7 @@ public class RoleEditReqVO {
     private String description;
 
     @ApiModelProperty(value = "状态")
-    private Boolean status = Constants.VALID;
+    private Boolean status = Constants.UNVALID;
 
     @ApiModelProperty(value = "权限id集合")
     private List<Long> mids = Lists.newArrayList();

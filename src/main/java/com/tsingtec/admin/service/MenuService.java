@@ -5,6 +5,7 @@ import com.tsingtec.admin.constants.Constants;
 import com.tsingtec.admin.entity.Admin;
 import com.tsingtec.admin.entity.Menu;
 import com.tsingtec.admin.entity.Role;
+import com.tsingtec.admin.handle.annotation.MenuAdd;
 import com.tsingtec.admin.repository.AdminRepository;
 import com.tsingtec.admin.repository.MenuRepository;
 import com.tsingtec.commons.exception.ServiceException;
@@ -35,6 +36,7 @@ public class MenuService {
 		return menuRepository.findById(id).orElse(null);
 	}
 
+	@MenuAdd
 	@Transactional
 	public void save(Menu vo) {
 		menuRepository.save(vo);
@@ -163,16 +165,19 @@ public class MenuService {
 	 * @param aid
 	 * @return
 	 */
-	public List<Menu> menuTreeList(Long aid) {
+	public List<Menu> menuTreeList(Long aid,Boolean all) {
 		List<Menu> menus = getMenu(aid);
-		/**
-		 * 去除按钮
-		 */
-		menus.removeIf(menu -> menu.getType().equals(Constants.BTN));
+		if(all){
+			/**
+			 * 去除按钮
+			 */
+			menus.removeIf(menu -> menu.getType().equals(Constants.BTN));
+		}
+
 		return getTree(menus);
 	}
 
-	private List<Menu> getTree(List<Menu> menus){
+	public List<Menu> getTree(List<Menu> menus){
 		List<Menu> list = Lists.newArrayList();
 		menus.forEach(menu -> {
 			if(menu.getPid().equals(Constants.PARENT)){
@@ -224,6 +229,7 @@ public class MenuService {
 		Menu menu = new Menu();
 		menu.setId(Constants.PARENT);
 		menu.setTitle("默认顶级菜单");
+		menu.setSpread(true);
 		menu.setChildren(getChildAll(Constants.PARENT,menus));
 		return Lists.newArrayList(menu);
 	}

@@ -5,7 +5,7 @@ import com.tsingtec.admin.entity.Role;
 import com.tsingtec.admin.service.RoleService;
 import com.tsingtec.admin.vo.req.role.RoleEditReqVO;
 import com.tsingtec.admin.vo.req.role.RolePageReqVO;
-import com.tsingtec.admin.vo.resp.role.RoleDetailRespVO;
+import com.tsingtec.admin.vo.resp.role.RoleMenuResqVO;
 import com.tsingtec.admin.vo.resp.role.RolePageRespVO;
 import com.tsingtec.commons.mapper.BeanMapper;
 import com.tsingtec.commons.support.R;
@@ -47,7 +47,9 @@ public class RoleController extends GenericController {
     @ApiOperation(value = "新增角色接口")
     @RequiresPermissions("sys:role:add")
     public R<Role> addRole(@RequestBody @Valid RoleEditReqVO vo){
-        Role role = BeanMapper.map(vo,Role.class);
+        Role role = new Role();
+        role.setCreatedId(this.getAid());
+        BeanMapper.mapExcludeNull(vo,role);
         roleService.save(role,vo.getMids());
         return R.ok();
     }
@@ -76,8 +78,7 @@ public class RoleController extends GenericController {
     @GetMapping("/role/{id}")
     @RequiresPermissions("sys:role:detail")
     @ApiOperation(value = "查询角色详情接口")
-    public R<RoleDetailRespVO> detail(@PathVariable("id") Long id){
-        Role role = roleService.getByAidAndId(this.getAid(),id);
-        return R.ok(BeanMapper.map(role,RoleDetailRespVO.class));
+    public R<RoleMenuResqVO> detail(@PathVariable("id") Long id){
+        return R.ok(roleService.getByAidAndId(this.getAid(),id));
     }
 }

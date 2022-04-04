@@ -30,7 +30,7 @@ public class ShiroLoginFilter extends FormAuthenticationFilter {
         if (isAjax) {//如果是ajax返回指定格式数据
             httpServletResponse.setContentType("application/json; charset=utf-8");
             //返回禁止访问json字符串
-            httpServletResponse.getWriter().write("{\"code\":-1,\"msg\":\"未登录用户！\"}");
+            httpServletResponse.getWriter().write("{\"code\":\"-1\",\"msg\":\"未登录用户！\"}");
         } else {//如果是普通请求进行重定向
             httpServletResponse.sendRedirect("/login");
         }
@@ -49,7 +49,7 @@ public class ShiroLoginFilter extends FormAuthenticationFilter {
         if (isAjax) {//如果是ajax返回指定格式数据
             httpServletResponse.setContentType("application/json; charset=utf-8");
             //返回禁止访问json字符串
-            httpServletResponse.getWriter().write("{\"code\":-1,\"msg\":\"未登录用户！\"}");
+            httpServletResponse.getWriter().write("{\"code\":\"-1\",\"msg\":\"未登录用户！\"}");
         } else {//如果是普通请求进行重定向
             httpServletResponse.sendRedirect("/login");
         }
